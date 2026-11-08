@@ -28,3 +28,6 @@ jobs:
       - run: python -m ergodlab demo > /tmp/demo.json
       - run: python -m ergodlab audit examples/occupancy.json > /tmp/audit.json
       - run: PYTHONPATH=. python examples/render_audit.py --check
+      - run: python -m ergodlab discount-demo > /tmp/discount-demo.json
+      - run: python -m ergodlab discount examples/discount.json > /tmp/discount.json
+      - run: PYTHONPATH=. python examples/render_discount.py --check
