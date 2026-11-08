@@ -39,6 +39,36 @@ The alternating chain has period 2. Its stationary block-sum variance is `0` for
 
 These are prescribed analytical counterexamples, not training results, held-out benchmarks or a universal ranking of policies. Reward-sum variance is **not** the variance of a policy-gradient estimator.
 
+## A discounted proxy need not be a gradient
+
+The optional `audit_discounted` API and `discount` CLI keep the stationary proxy separate from the actual normalized discounted objective with a fixed starting state. They return exact centered resolvents/derivatives, discounted occupancy, both gradient vectors, average-gradient bias, curl and all linear-system/centering residuals. Existing `audit` and `demo` remain unchanged.
+
+![Discounted proxy curl audit](assets/discount-audit.svg)
+
+A separate two-coordinate fixture has controlled switch probabilities `p=1/2`, `q=1/4`, with derivatives `dp=1/8`, `dq=1/16`. Its average-reward gradient is `[1/18,-1/18]`. At beta `1/2`:
+
+- The stationary proxy is `[1/21,-1/21]`.
+- Starting in state 0, the true objective `(1-beta) E_start[sum beta^t R_t]` is `2/7`, with gradient `[5/98,-1/98]`.
+- The proxy has exact `curl[0][1]=-1/147`, where `curl[i][j]=derivative_i(proxy_j)-derivative_j(proxy_i)`. Nonzero curl rules out a local scalar potential. This is an antisymmetric derivative matrix, not a full Jacobian. Zero curl alone would not prove a global potential.
+
+At beta `1`, the report solves the centered Poisson **limit**, not the singular discounted inverse. It recovers the true average-reward gradient and zero curl. Periodic chains are supported. The finite-beta rows make no monotone-bias or training claim. [DISCOUNT.md](DISCOUNT.md) derives every equation and the closed-form counterexample, with source attribution.
+
+```sh
+python -m ergodlab discount-demo
+python -m ergodlab discount examples/discount.json
+PYTHONPATH=. python examples/render_discount.py --check
+```
+
+```python
+from ergodlab import audit_discounted
+from ergodlab.discount_demo import curl_model
+
+report = audit_discounted(curl_model(), betas=[[1,2],[1,1]], initial_state=0)
+assert report['discounts'][0]['proxy_curl'][0][1] == [-1,147]
+```
+
+The new version-one JSON payload has exactly `version`, `model`, `betas`, `initial_state`. Betas are 1..8 distinct rational pairs `[n,d]` with integers `0<=n<=d<=10000`, including the endpoint limit. The initial state is an in-range non-boolean integer, held fixed when differentiating. [Complete caller input](examples/discount.json). The six-module v0.2 wheel reproduces the full discount demo outside checkout.
+
 ## Run
 
 ```sh
@@ -81,11 +111,11 @@ Every rational output is `[numerator, denominator]` in reduced form. JSON input 
 - `block_limit`: integer 1..32. The tree oracle checks at most 1,280 parent assignments, before filtering cycles/support, for five states. A single-state chain has one empty tree with weight 1.
 - Booleans, floats, ragged shapes, missing/extra fields, duplicate JSON keys, nonfinite JSON constants and files larger than 64 KiB are rejected. Malformed/unsupported CLI input produces exit 2 and no partial JSON.
 
-The finite dimension and bit-size bounds constrain work; there is no wall-time or memory SLA. Exact fractions can still grow. No global RNG is used or modified. Returned model data do not alias the input. A four-module wheel reproduces the demo outside the source checkout.
+The finite dimension and bit-size bounds constrain work; there is no wall-time or memory SLA. Exact fractions can still grow. No global RNG is used or modified. Returned model data do not alias the input. A six-module v0.2 wheel reproduces both demos outside the source checkout.
 
 ## Independent verification
 
-26 tests include:
+39 tests include the original stationary/reward checks:
 
 - 25 two-state switch-probability pairs with analytic stationary and asymptotic-variance formulas, including the period-two endpoint; 16 policy-weight settings with exact analytic occupancy gradients.
 - Nine two-, three- and four-state/two-coordinate settings, independent permutation-determinant stationary cofactors and central finite differences of the actual exponential-family stationary objective. These do not use production linear solves, scores or tree enumeration.
@@ -93,6 +123,8 @@ The finite dimension and bit-size bounds constrain work; there is no wall-time o
 - Single-state action-dependent IID rewards; transition-dependent telescoping rewards with positive one-step variance but zero asymptotic variance; reward shifts/scaling, state/action permutations, feature shifts, parameter scaling and zero-support reward invariance.
 - Five-state complete-chain tree counts (125 positive trees per root, 1,280 checked parent assignments), pivoting/singular solves, reducible refusal, strict validation/CLI and input/output/RNG isolation.
 - SVG byte regeneration, full compressed metadata, every plotted point and both limit-line geometries, plus rejection of changed undisplayed tree data.
+
+Discounted-resolvent verification adds ten tests: a 16-weight/four-beta analytic proxy/curl grid, three multi-state models across all seven starting-state choices and four betas using independent Cramer/determinant central differences, true fixed-start objective gradients, every curl entry, periodic/endpoint/near-one/IID cases, transformations, complete residuals, CLI and isolation. Three more SVG tests verify all 20 exact table cells/positions, complete metadata, byte regeneration and undisplayed-data rejection. Both figures regenerate exactly.
 
 ## Attribution and scope
 
