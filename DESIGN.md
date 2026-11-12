@@ -1,4 +1,4 @@
-# Finite stationary audit
+# ErgodLab stationary method
 
 All vectors below use row orientation for distributions and column orientation for state functions. All production computations use rational arithmetic. Policy weights/features, transition probabilities and rewards are supplied, not inferred.
 

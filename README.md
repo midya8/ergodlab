@@ -1,8 +1,13 @@
 # ErgodLab
 
-**A policy can change its long-run reward even when its immediate-reward gradient is zero.**
+ErgodLab computes how a supplied finite policy changes its stationary distribution and long-run reward. It uses exact rational arithmetic, checks stationary derivatives against directed spanning trees, solves the Poisson bias equation and returns every residual. It also computes the temporal variance of Markov-additive rewards. No simulation or fitted environment is involved.
 
-ErgodLab is a dependency-free, exact-rational laboratory for finite stationary policies. It differentiates the stationary distribution, cross-checks it against directed spanning trees, solves the Poisson bias equation, and audits the temporal variance of Markov-additive rewards. Every residual is returned. No simulation, fitted environment, paid API or external dataset.
+Two calculations share the same finite model:
+
+- [Stationary analysis](DESIGN.md): average reward, policy gradients and finite-block versus asymptotic reward-sum variance.
+- [Discounted analysis](DISCOUNT.md): the true fixed-start discounted objective versus a stationary proxy, including the proxy's curl and the endpoint Poisson limit.
+
+Both run in dependency-free Python without paid APIs or external datasets.
 
 ![Exact stationary reward audit](assets/stationary-audit.svg)
 
@@ -115,7 +120,7 @@ The finite dimension and bit-size bounds constrain work; there is no wall-time o
 
 ## Independent verification
 
-39 tests include the original stationary/reward checks:
+The full suite has 39 tests. The original stationary/reward checks include:
 
 - 25 two-state switch-probability pairs with analytic stationary and asymptotic-variance formulas, including the period-two endpoint; 16 policy-weight settings with exact analytic occupancy gradients.
 - Nine two-, three- and four-state/two-coordinate settings, independent permutation-determinant stationary cofactors and central finite differences of the actual exponential-family stationary objective. These do not use production linear solves, scores or tree enumeration.
@@ -124,7 +129,7 @@ The finite dimension and bit-size bounds constrain work; there is no wall-time o
 - Five-state complete-chain tree counts (125 positive trees per root, 1,280 checked parent assignments), pivoting/singular solves, reducible refusal, strict validation/CLI and input/output/RNG isolation.
 - SVG byte regeneration, full compressed metadata, every plotted point and both limit-line geometries, plus rejection of changed undisplayed tree data.
 
-Discounted-resolvent verification adds ten tests: a 16-weight/four-beta analytic proxy/curl grid, three multi-state models across all seven starting-state choices and four betas using independent Cramer/determinant central differences, true fixed-start objective gradients, every curl entry, periodic/endpoint/near-one/IID cases, transformations, complete residuals, CLI and isolation. Three more SVG tests verify all 20 exact table cells/positions, complete metadata, byte regeneration and undisplayed-data rejection. Both figures regenerate exactly.
+Ten discounted-resolvent tests cover: a 16-weight/four-beta analytic proxy/curl grid, three multi-state models across all seven starting-state choices and four betas using independent Cramer/determinant central differences, true fixed-start objective gradients, every curl entry, periodic/endpoint/near-one/IID cases, transformations, complete residuals, CLI and isolation. Three discounted SVG tests verify all 20 exact table cells/positions, complete metadata, byte regeneration and undisplayed-data rejection. Both figures regenerate exactly.
 
 ## Attribution and scope
 
