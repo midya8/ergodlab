@@ -120,7 +120,7 @@ The finite dimension and bit-size bounds constrain work; there is no wall-time o
 
 ## Independent verification
 
-The full suite has 39 tests. The original stationary/reward checks include:
+The full suite has 41 tests. The original stationary/reward checks include:
 
 - 25 two-state switch-probability pairs with analytic stationary and asymptotic-variance formulas, including the period-two endpoint; 16 policy-weight settings with exact analytic occupancy gradients.
 - Nine two-, three- and four-state/two-coordinate settings, independent permutation-determinant stationary cofactors and central finite differences of the actual exponential-family stationary objective. These do not use production linear solves, scores or tree enumeration.
@@ -130,6 +130,17 @@ The full suite has 39 tests. The original stationary/reward checks include:
 - SVG byte regeneration, full compressed metadata, every plotted point and both limit-line geometries, plus rejection of changed undisplayed tree data.
 
 Ten discounted-resolvent tests cover: a 16-weight/four-beta analytic proxy/curl grid, three multi-state models across all seven starting-state choices and four betas using independent Cramer/determinant central differences, true fixed-start objective gradients, every curl entry, periodic/endpoint/near-one/IID cases, transformations, complete residuals, CLI and isolation. Three discounted SVG tests verify all 20 exact table cells/positions, complete metadata, byte regeneration and undisplayed-data rejection. Both figures regenerate exactly.
+
+Two reward-shaping tests check the telescoping transformation
+`R'(s,a,t) = R(s,a,t) + beta*Phi(t) - Phi(s)` on the existing
+counterexample and periodic models, for both starting states and beta
+`0, 1/2, 3/4, 1`. The fixed-start normalized objective shifts by
+`-(1-beta)*Phi(start)` and its true policy gradient is unchanged. The stationary
+proxy need not be unchanged: its correction is
+`(beta-1) * mu * dP * Phi`, checked exactly for each coordinate. At beta one,
+average reward, total gradient and asymptotic reward-sum variance are preserved.
+Finite-block variances need not match. These are algebraic regression checks,
+not evidence about learning speed or improved policies.
 
 ## Attribution and scope
 
