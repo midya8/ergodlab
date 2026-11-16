@@ -72,7 +72,7 @@ report = audit_discounted(curl_model(), betas=[[1,2],[1,1]], initial_state=0)
 assert report['discounts'][0]['proxy_curl'][0][1] == [-1,147]
 ```
 
-The new version-one JSON payload has exactly `version`, `model`, `betas`, `initial_state`. Betas are 1..8 distinct rational pairs `[n,d]` with integers `0<=n<=d<=10000`, including the endpoint limit. The initial state is an in-range non-boolean integer, held fixed when differentiating. [Complete caller input](examples/discount.json). The six-module v0.2 wheel reproduces the full discount demo outside checkout.
+The new version-one JSON payload has exactly `version`, `model`, `betas`, `initial_state`. Betas are 1..8 distinct rational pairs `[n,d]` with integers `0<=n<=d<=10000`, including the endpoint limit. The initial state is an in-range non-boolean integer, held fixed when differentiating. [Complete caller input](examples/discount.json). The installed wheel reproduces the full discount demo outside checkout.
 
 ## Run
 
@@ -116,11 +116,11 @@ Every rational output is `[numerator, denominator]` in reduced form. JSON input 
 - `block_limit`: integer 1..32. The tree oracle checks at most 1,280 parent assignments, before filtering cycles/support, for five states. A single-state chain has one empty tree with weight 1.
 - Booleans, floats, ragged shapes, missing/extra fields, duplicate JSON keys, nonfinite JSON constants and files larger than 64 KiB are rejected. Malformed/unsupported CLI input produces exit 2 and no partial JSON.
 
-The finite dimension and bit-size bounds constrain work; there is no wall-time or memory SLA. Exact fractions can still grow. No global RNG is used or modified. Returned model data do not alias the input. A six-module v0.2 wheel reproduces both demos outside the source checkout.
+The finite dimension and bit-size bounds constrain work; there is no wall-time or memory SLA. Exact fractions can still grow. No global RNG is used or modified. Returned model data do not alias the input. The seven-module wheel reproduces all five complete CLI reports outside the source checkout.
 
 ## Independent verification
 
-The full suite has 41 tests. The original stationary/reward checks include:
+The full suite has 50 tests. The original stationary/reward checks include:
 
 - 25 two-state switch-probability pairs with analytic stationary and asymptotic-variance formulas, including the period-two endpoint; 16 policy-weight settings with exact analytic occupancy gradients.
 - Nine two-, three- and four-state/two-coordinate settings, independent permutation-determinant stationary cofactors and central finite differences of the actual exponential-family stationary objective. These do not use production linear solves, scores or tree enumeration.
@@ -141,6 +141,52 @@ proxy need not be unchanged: its correction is
 average reward, total gradient and asymptotic reward-sum variance are preserved.
 Finite-block variances need not match. These are algebraic regression checks,
 not evidence about learning speed or improved policies.
+
+## Which lags contribute to reward variance?
+
+`audit_covariance` returns exact finite-lag reward autocovariances and decomposes
+every stationary block variance into its diagonal and signed lag contributions.
+It keeps the existing stationary and discounted reports unchanged.
+
+```sh
+python -m ergodlab covariance examples/occupancy.json --max-lag 31
+python examples/verify_wheel.py
+```
+
+```python
+from ergodlab import audit_covariance
+from ergodlab.demo import periodic_model
+
+report = audit_covariance(periodic_model(), max_lag=3)
+assert report['reward_autocovariances'][1]['covariance'] == [-1, 4]
+assert report['block_decompositions'][3]['sum_variance'] == [0, 1]
+```
+
+For the alternating fixture, lag `k` has covariance `(-1)^k / 4`.
+For the sticky fixture it is `(3/4)^k / 4`. The former does not decay, so
+this finite-lag calculation does not assert an ordinary convergent infinite
+covariance sum. Both remain valid without an aperiodicity assumption.
+
+Rewards are attached to full `(state, action, next_state)` edges, not replaced
+with source-state conditional means. This matters even with independent states:
+for `R_t = S_(t+1) - S_t` with independent fair binary states, the lag-zero
+covariance is `1/2`, lag one is `-1/4`, and all later lags are zero. Every
+nonempty block has variance `1/2`, not a variance growing with its length.
+[The finite-sum derivation](COVARIANCE.md) explains the endpoint conditioning.
+
+`max_lag` is a non-boolean integer `0..31`; it requests block lengths
+`1..max_lag+1`. The CLI accepts the same strict version-one payload as `audit`.
+Nine tests check periodic and sticky closed forms, 16 seeded two-state
+edge-reward models against explicit path enumeration, a three-cycle,
+single-state action noise, telescoping rewards, transformations, validation,
+CLI behavior and input/RNG isolation. Each decomposition is also checked
+against the existing independent block-moment recurrence. These are exact
+finite-model checks, not evidence about learned policies or mixing rates.
+
+CI runs the full suite from the installed wheel outside checkout, checks all
+seven module origins before and after, compares all five complete reports via
+both CLI entry points and regenerates both original figures. The wheel check
+needs setuptools and wheel in its build interpreter; runtime stays dependency-free.
 
 ## Attribution and scope
 
