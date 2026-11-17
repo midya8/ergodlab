@@ -1,4 +1,4 @@
-# ErgodLab
+# Stationary gradients
 
 ErgodLab computes how a supplied finite policy changes its stationary distribution and long-run reward. It uses exact rational arithmetic, checks stationary derivatives against directed spanning trees, solves the Poisson bias equation and returns every residual. It also computes the temporal variance of Markov-additive rewards. No simulation or fitted environment is involved.
 
@@ -10,6 +10,9 @@ Two calculations share the same finite model:
 Both run in dependency-free Python without paid APIs or external datasets.
 
 ![Exact stationary reward audit](assets/stationary-audit.svg)
+
+The repository is now `stationary-gradients`. The Python import and CLI names stay
+`ergodlab` for compatibility with existing scripts.
 
 ## Two failures of a one-step view
 
