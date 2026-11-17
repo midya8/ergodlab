@@ -1,6 +1,6 @@
 # Stationary gradients
 
-ErgodLab computes how a supplied finite policy changes its stationary distribution and long-run reward. It uses exact rational arithmetic, checks stationary derivatives against directed spanning trees, solves the Poisson bias equation and returns every residual. It also computes the temporal variance of Markov-additive rewards. No simulation or fitted environment is involved.
+This implementation computes how a supplied finite policy changes its stationary distribution and long-run reward. It uses exact rational arithmetic, checks stationary derivatives against directed spanning trees, solves the Poisson bias equation and returns every residual. It also computes the temporal variance of Markov-additive rewards. No simulation or fitted environment is involved.
 
 Two calculations share the same finite model:
 
@@ -196,7 +196,7 @@ needs setuptools and wheel in its build interpreter; runtime stays dependency-fr
 Stationary sensitivities, Poisson equations, martingale reward decompositions and the Markov-chain tree theorem are standard mathematics, not new algorithms. Sources read for this implementation:
 
 - [Aldous and Fill, *Reversible Markov Chains and Random Walks on Graphs*, Section 9.2, Corollary 9.11](https://www.stat.berkeley.edu/~aldous/RWG/Book_Ralph/Ch9.S2.html): directed spanning-tree stationary formula, without a reversibility requirement.
-- [Glynn and Infanger, *Solving Poisson's Equation: Existence, Uniqueness, Martingale Structure, and CLT*](https://arxiv.org/html/2202.10404): Poisson/martingale framework. ErgodLab uses its own bounded finite-state edge-reward derivation, not the paper's countable-state theory or CLT results.
+- [Glynn and Infanger, *Solving Poisson's Equation: Existence, Uniqueness, Martingale Structure, and CLT*](https://arxiv.org/html/2202.10404): Poisson/martingale framework. This implementation uses its own bounded finite-state edge-reward derivation, not the paper's countable-state theory or CLT results.
 - [Greensmith, Bartlett and Baxter, JMLR 5 (2004), Section 3](https://jmlr.org/papers/volume5/greensmith04a/greensmith04a.pdf): average-reward policy-gradient context. This is not GPOMDP and does not reproduce that paper's experiments or variance-reduction algorithm.
 
 Code, finite-model fixtures, derivations, independent tests and figure are original implementations. No source code or dataset is copied. MIT licensed.
